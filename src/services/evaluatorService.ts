@@ -1,37 +1,22 @@
-import dotenv from 'dotenv';
+import { Evaluator } from './evaluator/evaluator';
 import { Expression } from './evaluator/expression';
-import { AdditionOperator, FloatDivisionOperator, IBinaryOperator, 
-         IntegerDivisionOperator, MultiplicationOperator, SubtractionOperator 
-        } from './evaluator/operators';
-dotenv.config();
+import { config } from '../configuration/config';
+import { createOperatorsMap } from './evaluator/operatorsFactory';
+import { IBinaryOperator } from './evaluator/operators';
 
 export class EvaluatorService {
     #operators: Map<string, IBinaryOperator>;
+    #evaluator: Evaluator;
 
     constructor() {
-        this.#operators = new Map<string, IBinaryOperator>();
-
-        this.#addToOperators(new AdditionOperator());
-        this.#addToOperators(new SubtractionOperator());
-        this.#addToOperators(new MultiplicationOperator());
-
-        if (process.env.USE_INTEGER_DIVISION === "true")
-            this.#addToOperators(new IntegerDivisionOperator());
-        else {
-            this.#addToOperators(new FloatDivisionOperator());
-        }
+        this.#operators = createOperatorsMap(config.useIntegerDivision);
+        this.#evaluator = new Evaluator(this.#operators);
     }
 
     eval(expressionString: string): number {
         const expression = Expression.fromString(expressionString);
-        const evaluator = new Evaluator(this.#operators);
 
-        return evaluator.eval(expression);
-    }
-
-    #addToOperators(operator: IBinaryOperator) {
-        const key = operator.toString();
-        this.#operators.set(key, operator);
+        return this.#evaluator.eval(expression).result;
     }
 }
 
