@@ -11,9 +11,10 @@ export class OperatorCollection {
         return this.#operatorPriorities;
     }
 
-    /** Contains all string representations of operators in collection. */
-    get operatorSymbols(): IterableIterator<string> {
-        return this.#operatorsMap.keys();
+    #operatorSymbols: Array<string>;
+     /** Contains all string representations of operators in collection, sorted by longest operator first. */
+    get operatorSymbols(): Array<string> {
+        return this.#operatorSymbols;
     }
 
     constructor(operatorArray: Array<IBinaryOperator>) {
@@ -22,11 +23,17 @@ export class OperatorCollection {
         operatorArray.forEach((op) => {this.#operatorsMap.set(op.toString(), op)});
 
         this.#operatorPriorities = this.#createOperatorPriorities(this.#operatorsMap);
+
+        // Sorts operator symbols by descending length,
+        // this is to make sure it tries to match longer symbols first.
+        this.#operatorSymbols = Array.from(this.#operatorsMap.keys()).sort(
+            (a, b) => a.length === b.length ? (a < b ? 1 : -1) : b.length - a.length
+        );
     }
 
     /** Returns operator whose symbol matches given string, 
      *  or undefined if no operator in collection has provided symbol. */
-    getOperatorFromString(key: string): IBinaryOperator | undefined {
+    getOperatorFromSymbol(key: string): IBinaryOperator | undefined {
         return this.#operatorsMap.get(key);
     }
 

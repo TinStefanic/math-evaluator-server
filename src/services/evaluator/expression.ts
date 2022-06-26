@@ -2,6 +2,10 @@ export class Expression {
     #chars = new Array<string>();
     #originalIndex = new Array<number>();
 
+    get length(): number {
+        return this.#chars.length;
+    }
+
     static fromString(expressionString: string): Expression {
         const expression = new Expression();
 
@@ -21,6 +25,11 @@ export class Expression {
         return this.#originalIndex.at(pos);
     }
 
+    /** Original index representing end of the expression, exclusive. */
+    originalIndexAtEnd(): number {
+        return (this.#originalIndex.at(-1) ?? 0) + 1;
+    }
+
     slice(start?: number, end?: number): Expression{
         const expression = new Expression();
 
@@ -30,7 +39,7 @@ export class Expression {
         return expression;
     }
 
-    get length(): number {
-        return this.#chars.length;
+    asString(): string {
+        return this.#chars.join("");
     }
 }

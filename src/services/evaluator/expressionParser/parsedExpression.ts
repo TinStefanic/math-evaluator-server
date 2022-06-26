@@ -1,7 +1,7 @@
 import { Evaluator } from '../evaluator';
 import { Expression } from '../expression';
 
-/** Returned by ExpressionParser, contains basic information about expression. */
+/** Contains basic information about parsed expression. */
 export interface IParsedExpression {
     get originalStartIndex(): number;
     /** End index is exclusive. */
@@ -12,15 +12,19 @@ export interface IParsedExpression {
     value(evaluator: Evaluator): number;
 }
 
+/** To be returned by ExpressionParser, contain only necessary information about parsed expression. */
 export class ParsedExpression implements IParsedExpression {
     #expression: Expression;
+    get expression() {
+        return this.#expression;
+    }
 
     get originalStartIndex(): number {
         return this.#expression.originalIndexAt(0) ?? -10;
     }
 
     get originalEndIndex(): number {
-        return (this.#expression.originalIndexAt(-1) ?? -101) + 1;
+        return this.#expression.originalIndexAtEnd();
     }
 
     #isEnclosedInBrackets: boolean;

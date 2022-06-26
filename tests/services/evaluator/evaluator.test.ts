@@ -1,8 +1,9 @@
-import { Evaluator, EmptyExpressionError } from '../../../src/services/evaluator/evaluator';
+import { Evaluator } from '../../../src/services/evaluator/evaluator';
 import { createOperatorCollection } from '../../../src/services/evaluator/operators/operatorCollection';
 import { Expression } from '../../../src/services/evaluator/expression';
-import { DivisionByZeroError } from '../../../src/services/evaluator/operators/operators';
-import { EvaluatorError } from '../../../src/services/evaluatorService';
+import { EmptyParenthesesError, EvaluatorError } from '../../../src/services/evaluator/evaluatorErrors';
+import { EmptyExpressionError } from '../../../src/services/evaluator/expressionParser/expressionParsingErrors';
+
 describe("Evaluator tests", () => {
     const useIntegerDivision = false;
     const evaluator = new Evaluator(createOperatorCollection(useIntegerDivision));
@@ -17,7 +18,7 @@ describe("Evaluator tests", () => {
         ["7 - (4 * 2)", -1],
         ["(((7)))", 7],
         ["(((2))-(((3))))", -1]
-    ])("Should correctly evaluate", (inputString: string, expectedResult: number) => {
+    ])("Should correctly evaluate '%s'", (inputString: string, expectedResult: number) => {
         const expression = Expression.fromString(inputString);
 
         expect(evaluator.eval(expression)).toEqual(expectedResult);
@@ -26,17 +27,17 @@ describe("Evaluator tests", () => {
     it.each([
         [""],
         ["    "],
-    ])("Should throw empty expression error", (inputString: string) => {
+    ])("Should throw empty expression error '%s'", (inputString: string) => {
         const expression = Expression.fromString(inputString);
 
-        expect(evaluator.eval(expression)).toThrow(EmptyExpressionError);
+        expect(() => (evaluator.eval(expression))).toThrow(EmptyExpressionError);
     });
 
     describe.each([
         ["()", 0, 2],
         ["5 * ( )", 4, 7],
         ["3*(4-())+(9)", 5, 7]
-    ]), "Empty parentheses error handling tests", (
+    ])("Empty parentheses error handling tests '%s'", (
         inputString: string, 
         expectedStart: number, 
         expectedEnd: number) => 
@@ -44,7 +45,7 @@ describe("Evaluator tests", () => {
         const expression = Expression.fromString(inputString);
 
         it("Should throw empty parentheses error", () => {
-            expect(evaluator.eval(expression)).toThrow(EmptyParenthesesError);
+            expect(() => (evaluator.eval(expression))).toThrow(EmptyParenthesesError);
         });
 
         it("Should have correct position of problematic parenthesis in the error", () => {
@@ -66,7 +67,7 @@ describe("Evaluator tests", () => {
         ["5 - 6 + (8 - 3) / (4 - 2 * 2)", 8, 29, 16, 17],
         ["100 / (1 / 1000000 / 1000000 / 1000000)", 0, 39, 4, 5],
         ["10 / 5 / 0", 5, 10, 7, 8]
-    ])("Division by zero error handling tests", (
+    ])("Division by zero error handling tests '%s'", (
         inputString: string, 
         expectedStart: number, 
         expectedEnd: number, 
@@ -76,7 +77,7 @@ describe("Evaluator tests", () => {
         const expression = Expression.fromString(inputString);
 
         it("Should throw division by zero error", () => {
-            expect(evaluator.eval(expression)).toThrow(DivisionByZeroError);
+            expect(() => (evaluator.eval(expression))).toThrow(/^Cannot divide by zero.*$/);
         });
 
         it("Should have correct position of problematic expression in thrown error", () => {

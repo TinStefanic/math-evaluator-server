@@ -1,10 +1,12 @@
-import { IBinaryOperator, OperatorError } from './operators/operators';
+import { OperatorError } from './operators/operators';
 import { Expression } from './expression';
-import { Queue } from 'queue-typescript'
-import { EvaluatorError } from "../evaluatorService";
+import { Queue } from 'queue-typescript';
 import { OperatorCollection } from './operators/operatorCollection';
-import { ParsedExpression, EvaluatedParsedExpression, IParsedExpression } from './expressionParser/parsedExpression';
+import { EvaluatedParsedExpression, IParsedExpression, ParsedExpression } from './expressionParser/parsedExpression';
 import { IParsedBinaryOperator } from "./expressionParser/parsedBinaryOperator";
+import { EmptyParenthesesError, EvaluatorError } from './evaluatorErrors';
+import { ExpressionParser } from './expressionParser/expressionParser';
+import { EmptyExpressionError } from './expressionParser/expressionParsingErrors';
 
 export class Evaluator {
     #operatorCollection: OperatorCollection;
@@ -12,36 +14,31 @@ export class Evaluator {
 
     constructor(operatorCollection: OperatorCollection) {
         this.#operatorCollection = operatorCollection;
-        this.#expressionParser = new ExpressionParser(this.#operatorCollection.operatorSymbols);
+        this.#expressionParser = new ExpressionParser(this.#operatorCollection);
     }
 
     eval(expression: Expression): number {
         const [expressions, operators] = this.#parseExpression(expression);
-
-        if (expressions.length === 0) throw new EmptyExpressionError("Cannot evaluate empty expression.");
 
         if (expressions.length === 1) return this.#handleSingleExpression(expressions.front);
 
         return this.#evaluateExpressionQueue(expressions, operators);
     }
 
-    #parseExpression(expression: Expression): [Queue<IParsedExpression>, Queue<IParsedBinaryOperator>] {
+    #parseExpression(expression: Expression): [Queue<ParsedExpression>, Queue<IParsedBinaryOperator>] {
         return this.#expressionParser.parse(expression);
     }
 
     /** Doesn't work on arbitrary expression, expects expression returned from parseExpression. */
-    #handleSingleExpression(expression: IParsedExpression): number {
-        if (this.#expressionParser.isEnclosedInBrackets(expression)) {
+    #handleSingleExpression(parsedExpression: ParsedExpression): number {
+        if (parsedExpression.isEnclosedInBrackets) {
             try {
-                return this.eval(this.#expressionParser.removeEnclosedBrackets(expression));
+                return this.eval(this.#expressionParser.removeEnclosedParenthesis(parsedExpression));
             } catch (error) {
                 if (error instanceof EmptyExpressionError) {
-                    const e = error as EmptyExpressionError;
-
-                    throw new EmptyParenthesesError(
-                        e.message, 
-                        expression.originalStartIndex, 
-                        expression.originalEndIndex,
+                    throw new EmptyParenthesesError( 
+                        parsedExpression.originalStartIndex, 
+                        parsedExpression.originalEndIndex,
                     );
                 }
 
@@ -50,7 +47,7 @@ export class Evaluator {
         }
         
         /* If it isn't enclosed in brackets it is guaranteed to be just number. */
-        return this.#expressionParser.parseIntExpression(expression);
+        return this.#expressionParser.parseIntExpression(parsedExpression);
     }
 
     #evaluateExpressionQueue(expressions: Queue<IParsedExpression>, operators: Queue<IParsedBinaryOperator>): number {
@@ -60,7 +57,7 @@ export class Evaluator {
             }
         );
 
-        return this.#handleSingleExpression(expressions.front);
+        return expressions.front.value(this);
     }
 
     #applyAllOperatorsOfTargetPriority(
@@ -84,6 +81,8 @@ export class Evaluator {
 
             expressions.prepend(this.#applyOperator(lhs, rhs, operator));
         }
+
+        while (expressions.length > 0) newExpressions.enqueue(expressions.dequeue());
 
         return [newExpressions, newOperators];
     }
@@ -112,13 +111,12 @@ export class Evaluator {
         } catch (error) {
             if (error instanceof OperatorError) {
                 const e = error as OperatorError;
-                throw new EvaluatorError(
-                    e.message, 
-                    lhs.originalStartIndex, 
-                    rhs.originalEndIndex, 
-                    operator.startPosition, 
-                    operator.endPosition
-                );
+                e.startPos = lhs.originalStartIndex;
+                e.endPos = rhs.originalEndIndex;
+                e.operatorStartPos = operator.originalStartPosition;
+                e.operatorEndPos = operator.originalEndPosition;
+
+                throw e;
             }
 
             if (error instanceof EvaluatorError)
@@ -126,17 +124,5 @@ export class Evaluator {
 
             throw error;
         }
-    }
-}
-
-export class EmptyExpressionError extends EvaluatorError {
-    constructor(message: string) {
-        super(message);
-    }
-}
-
-export class EmptyParenthesesError extends EvaluatorError {
-    constructor(message: string, startPos: number, endPos: number) {
-        super(message, startPos, endPos);
     }
 }

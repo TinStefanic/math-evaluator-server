@@ -25,29 +25,3 @@ export class EvaluatorService {
         return this.#evaluator.eval(expression);
     }
 }
-
-export class EvaluatorError extends Error {
-    /** Starting position of problematic part of expression, inclusive. */
-    startPos?: number;
-    /** Ending position of problematic part of expression, exclusive. */
-    endPos?: number;
-
-    /** Starting position of problematic operator, inclusive. */
-    operatorStartPos?: number;
-    /** Ending position of problematic operator, exclusive. */
-    operatorEndPos?: number;
-
-    constructor(
-        message?: string, 
-        startPos?: number, 
-        endPos?: number, 
-        operatorStartPos?: number, 
-        operatorEndPos?: number) 
-    {
-        super(message);
-        this.startPos = startPos;
-        this.endPos = endPos;
-        this.operatorStartPos = operatorStartPos;
-        this.operatorEndPos = operatorEndPos;
-    }
-}

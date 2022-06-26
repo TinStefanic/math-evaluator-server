@@ -1,3 +1,4 @@
+import { EvaluatorError } from "../evaluatorErrors";
 
 /** Interface that represents binary operator. */
 export interface IBinaryOperator {
@@ -91,7 +92,7 @@ export class IntegerDivisionOperator implements IBinaryOperator {
     }
 }
 
-export class OperatorError extends Error {
+export class OperatorError extends EvaluatorError {
     constructor(message?: string) {
         super(message);
     }
