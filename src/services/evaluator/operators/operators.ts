@@ -61,6 +61,8 @@ export class FloatDivisionOperator implements IBinaryOperator {
     }
 
     apply(lhs: number, rhs: number): number {
+        if (Math.abs(rhs) < 1e-9) throw new DivisionByZeroError();
+
         return lhs / rhs;
     }
 
@@ -75,6 +77,8 @@ export class IntegerDivisionOperator implements IBinaryOperator {
     }
 
     apply(lhs: number, rhs: number): number {
+        if (rhs === 0) throw new DivisionByZeroError();
+
         // Works the following way:
         // Math.floor(-10 / 3) = -4;
         // Alternatively can use: 
@@ -84,5 +88,17 @@ export class IntegerDivisionOperator implements IBinaryOperator {
 
     get priority(): number {
         return 2;
+    }
+}
+
+export class OperatorError extends Error {
+    constructor(message?: string) {
+        super(message);
+    }
+}
+
+export class DivisionByZeroError extends OperatorError {
+    constructor() {
+        super("Cannot divide by zero.")
     }
 }

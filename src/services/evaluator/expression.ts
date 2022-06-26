@@ -29,4 +29,8 @@ export class Expression {
 
         return expression;
     }
+
+    get length(): number {
+        return this.#chars.length;
+    }
 }
