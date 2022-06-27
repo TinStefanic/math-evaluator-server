@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { keyof } from 'ts-keyof';
-import { EvaluatorError, EvaluatorService } from '../services/evaluatorService';
+import { EvaluatorError } from '../services/evaluator/evaluatorErrors';
+import { EvaluatorService } from '../services/evaluatorService';
 
 interface IApiRequestQuery {
     expression?: string;
@@ -50,7 +51,7 @@ const evaluateExpression = function (
     } catch (error) {
         if (error instanceof EvaluatorError) {
             const e = error as EvaluatorError;
-            res.status(400).json({
+            res.status(422).json({
                 errorMessage: e.message,
                 errorStartPos: e.startPos,
                 errorEndPos: e.endPos

@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { config } from '../src/configuration/config';
+import { config } from '../../src/configuration/config';
 
 describe("Tests config", () => {
     dotenv.config();

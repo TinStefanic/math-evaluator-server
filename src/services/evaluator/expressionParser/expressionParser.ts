@@ -65,7 +65,7 @@ class SingleUseParser {
         this.#expression = expression;
     }
 
-    /** Throws exception it it can't parse expression. */
+    /** Throws exception if it can't parse expression. */
     parseExpression() {
         const startOfExpression = this.#expressions.length === 0;
 

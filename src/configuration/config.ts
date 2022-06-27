@@ -8,7 +8,7 @@ export interface IConfig {
 
 export const config: IConfig = {
     get port(): number {
-        return parseInt(process.env.PORT ?? "40_404");
+        return parseInt(process.env.PORT ?? "40404");
     },
 
     get useIntegerDivision(): boolean {
