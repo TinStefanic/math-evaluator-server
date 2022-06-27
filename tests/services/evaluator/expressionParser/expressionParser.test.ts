@@ -1,6 +1,7 @@
 import { createOperatorCollection } from '../../../../src/services/evaluator/operators/operatorCollection';
 import { ExpressionParser } from '../../../../src/services/evaluator/expressionParser/expressionParser';
 import { Expression } from '../../../../src/services/evaluator/expression';
+
 describe("ExpressionParser tests", () => {
     const useIntegerDivision = false;
     const operatorCollection = createOperatorCollection(useIntegerDivision);

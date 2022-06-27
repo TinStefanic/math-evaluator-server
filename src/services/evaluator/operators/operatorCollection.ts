@@ -20,7 +20,7 @@ export class OperatorCollection {
     constructor(operatorArray: Array<IBinaryOperator>) {
         this.#operatorsMap = new Map<string, IBinaryOperator>();
 
-        operatorArray.forEach((op) => {this.#operatorsMap.set(op.toString(), op)});
+        operatorArray.forEach((op) => {this.#operatorsMap.set(op.asSymbol(), op)});
 
         this.#operatorPriorities = this.#createOperatorPriorities(this.#operatorsMap);
 

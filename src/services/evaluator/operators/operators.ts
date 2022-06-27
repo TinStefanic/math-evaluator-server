@@ -3,7 +3,7 @@ import { EvaluatorError } from "../evaluatorErrors";
 /** Interface that represents binary operator. */
 export interface IBinaryOperator {
     /** Returns string representation of the operator. */
-    toString(): string;
+    asSymbol(): string;
 
     /** Applies the operator on 2 values. */
     apply(lhs: number, rhs: number): number;
@@ -15,7 +15,7 @@ export interface IBinaryOperator {
 }
 
 export class AdditionOperator implements IBinaryOperator {
-    toString(): string {
+    asSymbol(): string {
         return "+";
     }
 
@@ -29,7 +29,7 @@ export class AdditionOperator implements IBinaryOperator {
 }
 
 export class SubtractionOperator implements IBinaryOperator {
-    toString(): string {
+    asSymbol(): string {
         return "-";
     }
 
@@ -43,7 +43,7 @@ export class SubtractionOperator implements IBinaryOperator {
 }
 
 export class MultiplicationOperator implements IBinaryOperator {
-    toString(): string {
+    asSymbol(): string {
         return "*";
     }
 
@@ -57,12 +57,13 @@ export class MultiplicationOperator implements IBinaryOperator {
 }
 
 export class FloatDivisionOperator implements IBinaryOperator {
-    toString(): string {
+    asSymbol(): string {
         return "/";
     }
 
     apply(lhs: number, rhs: number): number {
-        if (Math.abs(rhs) < 1e-9) throw new DivisionByZeroError();
+        // Different part of the system ensures that arguments won't be NaNs.
+        if (rhs === 0 || isNaN(rhs / lhs)) throw new DivisionByZeroError();
 
         return lhs / rhs;
     }
@@ -73,7 +74,7 @@ export class FloatDivisionOperator implements IBinaryOperator {
 }
 
 export class IntegerDivisionOperator implements IBinaryOperator {
-    toString(): string {
+    asSymbol(): string {
         return "/";
     }
 

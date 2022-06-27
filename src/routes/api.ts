@@ -1,13 +1,12 @@
-import express, { NextFunction, Request, Response } from 'express';
-import { keyof } from 'ts-keyof';
-import { EvaluatorError } from '../services/evaluator/evaluatorErrors';
-import { EvaluatorService } from '../services/evaluatorService';
+import express from 'express';
+import { ensureExpressionIsPresent } from './api/ensureExpressionIsPresent';
+import { evaluateExpression } from './api/evaluateExpression';
 
-interface IApiRequestQuery {
+export interface IApiRequestQuery {
     expression?: string;
 }
 
-interface IApiResponse {
+export interface IApiResponse {
     /** Result after evaluating expression. */
     result?: number;
 
@@ -25,49 +24,6 @@ interface IApiResponse {
 
     /** End position of operator related to error. */
     errorOpEndPos?: number;
-}
-
-const ensureExpressionIsPresent = function (
-    req: Request<unknown, IApiResponse, unknown, IApiRequestQuery>, 
-    res: Response<IApiResponse>, 
-    next: NextFunction)
-{
-    const expression = "";
-    if (req.query.expression == null) {
-        res.status(400).json( 
-            { errorMessage: `GET parameter '${keyof({expression})}' is mandatory but wasn't provided.`} 
-        );
-    }
-
-    next();
-}
-
-const evaluateExpression = function (
-    req: Request<unknown, IApiResponse, unknown, IApiRequestQuery>, 
-    res: Response<IApiResponse>, 
-    next: NextFunction)
-{
-    const expression = req.query.expression ?? "";
-    const evaluator = new EvaluatorService();
-
-    try {
-        const result = evaluator.eval(expression);
-        res.status(200).json( {result: result} );
-
-    } catch (error) {
-        if (error instanceof EvaluatorError) {
-            const e = error as EvaluatorError;
-            res.status(422).json({
-                errorMessage: e.message,
-                errorStartPos: e.startPos,
-                errorEndPos: e.endPos,
-                errorOpStartPos: e.operatorStartPos,
-                errorOpEndPos: e.operatorEndPos
-            });
-        }
-    }
-
-    next();
 }
 
 const apiRouter = express.Router();

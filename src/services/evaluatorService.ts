@@ -8,7 +8,7 @@ export class EvaluatorService {
     #evaluator: Evaluator;
 
     constructor() {
-        this.#evaluator = new Evaluator(createOperatorCollection(config.useIntegerDivision), );
+        this.#evaluator = new Evaluator(createOperatorCollection(config.useIntegerDivision));
     }
 
     /**
