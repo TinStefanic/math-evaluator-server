@@ -19,6 +19,12 @@ interface IApiResponse {
 
     /** End position of error. */
     errorEndPos?: number;
+
+    /** Start position of operator related to error. */
+    errorOpStartPos?: number;
+
+    /** End position of operator related to error. */
+    errorOpEndPos?: number;
 }
 
 const ensureExpressionIsPresent = function (
@@ -54,7 +60,9 @@ const evaluateExpression = function (
             res.status(422).json({
                 errorMessage: e.message,
                 errorStartPos: e.startPos,
-                errorEndPos: e.endPos
+                errorEndPos: e.endPos,
+                errorOpStartPos: e.operatorStartPos,
+                errorOpEndPos: e.operatorEndPos
             });
         }
     }
