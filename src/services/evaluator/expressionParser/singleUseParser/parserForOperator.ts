@@ -55,12 +55,13 @@ export class ParserForOperator {
 
         else {
             const opLength = operator.asSymbol().length;
+            const startPosition = expression.originalIndexAt(currPos) ?? 0
 
             return {
                 priority: operator.priority,
                 apply: operator.apply,
-                originalStartPosition: expression.originalIndexAt(currPos) ?? 0,
-                originalEndPosition: expression.originalIndexAt(currPos + opLength) ?? 0,
+                originalStartPosition: startPosition,
+                originalEndPosition: startPosition + opLength,
                 asSymbol: operator.asSymbol
             }
         }

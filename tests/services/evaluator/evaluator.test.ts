@@ -33,6 +33,24 @@ describe("Evaluator tests", () => {
         expect(() => (evaluator.eval(expression))).toThrow(EmptyExpressionError);
     });
 
+    it.each([
+        ["(5 - 8) + (5 - 9 +)", 17, 18],
+        ["5  +    ", 3, 4]
+    ])("Should have correct operator position in error", 
+        (input: string, expectedStart: number, expectedEnd: number) => 
+    {
+        const expression = Expression.fromString(input);
+
+        try {
+            evaluator.eval(expression);
+            fail("Expected to throw error, but error wasn't thrown");
+        } catch (error) {
+            const e = error as EvaluatorError;
+            expect(e.operatorStartPos).toEqual(expectedStart);
+            expect(e.operatorEndPos).toEqual(expectedEnd);
+        }
+    });
+
     describe.each([
         ["()", 0, 2],
         ["5 * ( )", 4, 7],
